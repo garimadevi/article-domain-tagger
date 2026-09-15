@@ -3,7 +3,7 @@
 > Classify news articles into **11 IAB topic domains** with a **44 MB distilled student model** (4L-256H, 0.64 GFLOP, 82.4% accuracy, 0.766 macro-F1, ~6 ms CPU).
 
 **🌐 Project webpage (GitHub Pages):** `https://garimadevi.github.io/article-domain-tagger/`
-**🎥 Video presentation:** `https://youtu.be/YOUR_VIDEO_ID` _(TODO: replace after YouTube upload — see `VIDEO_SCRIPT.md`)_
+**🎥 Video presentation:** https://youtu.be/GYFeDFcVSM8
 **💻 Live demo (frontend):** deploying soon — code in [`frontend/`](frontend/), backend in [`app.py`](app.py)
 
 By **Garima Devi** · Mentors: Assigned Mentor, **Mohd. Amaan Sir** · Faculty Advisor: **Prof. Prithwijit Guha** · Co-Advisor: **Ashwin Jacob Gigo** · Deadline: **15th Sept 2026**
@@ -102,7 +102,7 @@ generated/deployed_student/  docs/ (GitHub Pages site)  tools/make_github_figs.p
 
 ## 8. Publish checklist (15 Sept)
 
-- [ ] Replace `YOUR_VIDEO_ID` in `docs/index.html` + top of this README after YouTube upload
+- [x] Video uploaded: https://youtu.be/GYFeDFcVSM8 (wired into `docs/index.html` + top of this README)
 - [ ] Deploy `frontend/dist` to Netlify/Vercel, replace demo link in `docs/index.html`
 - [ ] Push `main`, enable `Settings → Pages → Deploy from branch → main /docs`
 - [ ] Share Pages + repo + video links with mentors
