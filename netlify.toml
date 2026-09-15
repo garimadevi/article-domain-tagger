@@ -1,0 +1,12 @@
+# Netlify: build only the React frontend (static). Backend (FastAPI) must be
+# hosted separately (Render / HuggingFace Spaces) and set as VITE_API_URL.
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback: serve index.html for any route
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

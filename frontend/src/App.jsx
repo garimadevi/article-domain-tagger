@@ -124,6 +124,11 @@ const METRICS = [
   { value: '~6 ms', label: 'CPU Latency' },
 ]
 
+// Backend base URL: set VITE_API_URL on Netlify to your live FastAPI URL
+// (e.g. https://article-domain-tagger.onrender.com). Empty string = same
+// origin (local dev via vite proxy, or backend served alongside frontend).
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+
 function ConfidenceRing({ confidence, color }) {
   const radius = 80
   const stroke = 10
@@ -782,7 +787,7 @@ function App() {
     setError(null)
     setResult(null)
     try {
-      const res = await fetch('/predict', {
+      const res = await fetch(`${API_BASE}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text.trim() }),
@@ -803,7 +808,7 @@ function App() {
     setError(null)
     setResult(null)
     try {
-      const res = await fetch('/fetch-url', {
+      const res = await fetch(`${API_BASE}/fetch-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
