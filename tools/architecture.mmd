@@ -1,0 +1,13 @@
+flowchart LR
+  A[106K IAB Articles<br/>HF: mdonigian/iab-news-classification] --> B[Filter to 11 Labels<br/>+ Env keyword extract<br/>65,083 articles]
+  B --> C[Stratified 80/10/10<br/>52,065 / 6,509 / 6,509<br/>seed 42, MAX_LEN 96]
+  C --> D[Teacher: DistilBERT<br/>67M, 6L-768H<br/>3 epochs, LR 2e-5<br/>val macro-F1 0.807]
+  D --> E[Cache Teacher Logits<br/>train_logits.npz<br/>soft targets, T=3]
+  E --> F[Student 4L-256H<br/>11.2M, 4L-256H-4H<br/>KD alpha=0.7, 5 epochs<br/>seeds 42 + 1337, val F1 0.771]
+  F --> G[Export 44MB<br/>0.64 GFLOP PASS<br/>generated/deployed_student]
+  G --> H[FastAPI app.py<br/>POST /predict<br/>POST /fetch-url]
+  H --> I[React Frontend<br/>frontend/src/App.jsx<br/>paste text or URL]
+
+  style D fill:#ede9fe,stroke:#6d28d9
+  style F fill:#dcfce7,stroke:#15803d
+  style G fill:#cffafe,stroke:#0e7490

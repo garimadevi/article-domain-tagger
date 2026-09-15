@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Data / models (large — do NOT push)
+*.npz
+*.bin
+*.safetensors
+generated/news_domain_tagging_v2.csv
+generated/review_ambiguous.csv
+generated/deployed_student/
+generated/deployed_student_test/
+generated/student_4L_256H_seed1337/
+generated/deployed_student.zip
+news_domain_tagging_cleaned.csv
+# keep small CSVs that the Pages figures need:
+!generated/token_stats.csv
+!generated/class_counts_revised.csv
+!generated/mapping_audit.csv
+!generated/split_*.csv
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# OS / secrets
+.DS_Store
+Thumbs.db
+.env
+*.log

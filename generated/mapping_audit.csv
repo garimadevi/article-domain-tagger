@@ -1,0 +1,43 @@
+category,count,legacy_label,revised_label,decision,keyword_hint
+POLITICS,35602,Politics,Politics and Government,mapped,
+WELLNESS,17945,Lifestyle,Health,mapped,
+ENTERTAINMENT,17362,Entertainment,"Arts, Culture, Entertainment and Media",mapped,
+TRAVEL,9900,Lifestyle,Lifestyle and Leisure,mapped,
+STYLE & BEAUTY,9814,Entertainment,Lifestyle and Leisure,mapped,
+PARENTING,8791,Lifestyle,Lifestyle and Leisure,mapped,
+HEALTHY LIVING,6694,NaN,Health,mapped,
+QUEER VOICES,6347,Politics,REVIEW,review,identity-voice desk; mixed topics (politics/society/lifestyle) — manual review
+FOOD & DRINK,6340,Lifestyle,Lifestyle and Leisure,mapped,
+BUSINESS,5992,Business,"Economy, Business and Finance",mapped,
+COMEDY,5400,Entertainment,"Arts, Culture, Entertainment and Media",mapped,
+SPORTS,5077,Sports,Sport,mapped,
+BLACK VOICES,4583,Politics,REVIEW,review,identity-voice desk; mixed topics (entertainment/politics/society) — manual review
+HOME & LIVING,4320,Lifestyle,REVIEW,review,home/lifestyle desk but drifted to streaming/entertainment — manual review
+PARENTS,3955,Lifestyle,Lifestyle and Leisure,mapped,
+THE WORLDPOST,3664,World,REVIEW,review,global/opinion hybrid; topic varies — manual review
+WEDDINGS,3653,Lifestyle,Lifestyle and Leisure,mapped,
+WOMEN,3572,Politics,REVIEW,review,identity-voice desk; mixed topics (lifestyle/society) — manual review
+CRIME,3562,Crime,"Crime, Law and Justice",mapped,
+IMPACT,3484,Politics,REVIEW,review,social-issues/cannes; Politics vs Society/Lifestyle — manual review
+DIVORCE,3426,Lifestyle,Lifestyle and Leisure,mapped,
+WORLD NEWS,3299,World,REVIEW,review,"geography desk, not a topic; no catch-all 'World' — manual review"
+MEDIA,2944,Business,"Arts, Culture, Entertainment and Media",mapped,
+WEIRD NEWS,2777,NaN,REVIEW,review,oddity/human-interest; Lifestyle vs Society — manual review
+GREEN,2622,Business,Environment and Climate,mapped,
+WORLDPOST,2579,World,REVIEW,review,global/opinion hybrid; topic varies — manual review
+RELIGION,2577,World,REVIEW,review,faith/religion; Lifestyle (practice) vs Society/Politics — manual review
+STYLE,2254,Entertainment,Lifestyle and Leisure,mapped,
+SCIENCE,2206,NaN,Science and Technology,mapped,
+TECH,2104,Business,Science and Technology,mapped,
+TASTE,2096,NaN,Lifestyle and Leisure,mapped,
+MONEY,1756,Business,"Economy, Business and Finance",mapped,
+ARTS,1509,Entertainment,"Arts, Culture, Entertainment and Media",mapped,
+ENVIRONMENT,1444,NaN,Environment and Climate,mapped,
+FIFTY,1401,NaN,REVIEW,review,50-plus lifestyle desk; Lifestyle vs Society — manual review
+GOOD NEWS,1398,NaN,REVIEW,review,human-interest feel-good; Lifestyle vs Society — manual review
+U.S. NEWS,1377,NaN,REVIEW,review,national mixed desk; topic varies (politics/education/crime) — manual review
+ARTS & CULTURE,1339,NaN,"Arts, Culture, Entertainment and Media",mapped,
+COLLEGE,1144,Education,Education,mapped,
+LATINO VOICES,1130,Politics,REVIEW,review,identity-voice desk; mixed topics (politics/crime/society) — manual review
+CULTURE & ARTS,1074,Entertainment,"Arts, Culture, Entertainment and Media",mapped,
+EDUCATION,1014,Education,Education,mapped,

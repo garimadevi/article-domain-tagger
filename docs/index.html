@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article Domain Tagger — Knowledge Distillation Project | Garima Devi</title>
+<meta name="description" content="Classify news articles into 11 IAB domains with a 44MB distilled student model (4L-256H, 0.64 GFLOP, 82.4% accuracy, 0.766 macro-F1).">
+<link rel="stylesheet" href="assets/css/style.css">
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">Article Domain Tagger</div>
+    <ul class="nav-links">
+      <li><a href="#intro">Intro</a></li>
+      <li><a href="#video">Video</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#math">Math</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#demo">Demo &amp; Code</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- 1. INTRODUCTION -->
+<header class="hero" id="intro">
+  <div class="hero-content">
+    <span class="badge">Knowledge Distillation Project &bull; Internship 2026</span>
+    <h1>Article Domain Tagger</h1>
+    <p class="subtitle">Classify news articles into <strong>11 IAB topic domains</strong> with a
+      <strong>44&nbsp;MB distilled student model</strong> that runs in <strong>~6&nbsp;ms on CPU</strong>
+      (0.64&nbsp;GFLOP, 11.2M params).</p>
+    <div class="hero-metrics">
+      <div class="metric"><span>82.4%</span>Accuracy (test)</div>
+      <div class="metric"><span>0.766</span>Macro-F1 (test)</div>
+      <div class="metric"><span>0.64</span>GFLOP (budget 1.0)</div>
+      <div class="metric"><span>11.2M</span>Params (vs 67M)</div>
+    </div>
+    <div class="hero-actions">
+      <a href="#video" class="btn btn-primary">Watch Presentation</a>
+      <a href="#demo" class="btn btn-secondary">Try Live Demo</a>
+      <a href="https://github.com/garimadevi/article-domain-tagger" class="btn btn-secondary" target="_blank" rel="noopener">View Code</a>
+    </div>
+    <p class="hero-note">By <strong>Garima Devi</strong> &bull; Submission deadline: <strong>15th September 2026</strong></p>
+  </div>
+</header>
+
+<main>
+<!-- VIDEO PRESENTATION -->
+<section class="section video-section" id="video">
+  <div class="container">
+    <h2 class="section-title">Video Presentation</h2>
+    <p class="section-description">Complete walkthrough: dataset, architecture, knowledge-distillation logic, results and live demo.</p>
+    <!-- TODO-Garima: after uploading to YouTube, replace YOUR_VIDEO_ID below with the real 11-char ID.
+         Example: https://www.youtube.com/embed/dQw4w9WgXcQ -->
+    <div class="video-wrapper">
+      <iframe width="100%" height="450" src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+        title="Article Domain Tagger — Project Walkthrough (Garima Devi)" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+    <p class="video-caption">
+      Chapters: 0:00 Intro &amp; team &bull; 0:30 Problem &amp; IAB dataset &bull; 1:30 Taxonomy &amp; splits &bull;
+      2:30 Architecture &bull; 3:30 KD loss walkthrough &bull; 4:30 Results &amp; graphs &bull; 5:30 Live demo &bull; 6:30 Limitations &amp; links.
+      <br>Direct link (after upload): <code>https://youtu.be/YOUR_VIDEO_ID</code>
+    </p>
+    <div class="callout">
+      <strong>How to publish:</strong> OBS / Windows Game Bar (Win+G) &rarr; record 6–7 min &rarr; YouTube Studio &rarr; Upload &rarr;
+      Title: <em>Article Domain Tagger — Knowledge Distillation (11 Domains, 0.64 GFLOP) | Garima Devi</em> &rarr;
+      Visibility: Unlisted or Public &rarr; paste Video ID above. Full script is in <code>VIDEO_SCRIPT.md</code> in the repo.
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section architecture-section" id="architecture">
+  <div class="container">
+    <h2 class="section-title">System Architecture</h2>
+    <p class="section-description">Teacher (DistilBERT 67M) &rarr; cached soft labels &rarr; Student (4L-256H, 11.2M) &rarr; FastAPI + React.</p>
+    <div class="architecture-diagram">
+      <img src="assets/images/architecture.png" alt="Article Domain Tagger pipeline: IAB data, teacher training, logit caching, student distillation, export and deployment" class="diagram-img">
+    </div>
+    <p class="video-caption">Mermaid source for this diagram is in <code>tools/architecture.mmd</code> — re-export from <a href="https://mermaid.live" target="_blank" rel="noopener">mermaid.live</a> if you restyle it.</p>
+    <div class="architecture-steps">
+      <div class="step"><span class="step-number">1</span><h3>Data Preparation</h3>
+        <p>106K IAB articles (<code>mdonigian/iab-news-classification</code>) &rarr; filter to 11 labels + keyword-extract Environment from Science &rarr; 65,083 articles &rarr; stratified 80/10/10 split, seed 42 (52,065 / 6,509 / 6,509). See <code>data/taxonomy.py</code>.</p></div>
+      <div class="step"><span class="step-number">2</span><h3>Teacher Training</h3>
+        <p>Fine-tune <code>distilbert-base-uncased</code> + 11-label head, 3 epochs, LR 2e-5, batch 32, inverse-frequency weights. Best val macro-F1 <strong>0.807</strong>. See <code>train/teacher_train.py</code>.</p></div>
+      <div class="step"><span class="step-number">3</span><h3>Knowledge Distillation</h3>
+        <p>Cache teacher logits (<code>train/cache_teacher_logits.py</code>), train Student 4L-256H with KL (T=3, &alpha;=0.7) + weighted CE, 5 epochs, seeds 42 &amp; 1337 &rarr; mean val F1 <strong>0.771</strong>. See <code>train/train_student.py:38-43</code>.</p></div>
+      <div class="step"><span class="step-number">4</span><h3>Deployment</h3>
+        <p>Export 44&nbsp;MB model (<code>deploy/model_export.py</code>, <code>generated/deployed_student/</code>) &rarr; FastAPI <code>app.py</code> (<code>/predict</code>, <code>/fetch-url</code>) &harr; React frontend (<code>frontend/src/App.jsx</code>). CPU p50 ~5.8&nbsp;ms.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MATH -->
+<section class="section math-section" id="math">
+  <div class="container">
+    <h2 class="section-title">Mathematical Foundation</h2>
+    <p class="section-description">The three equations that govern the project — loss, imbalance handling, compute budget.</p>
+
+    <div class="math-card">
+      <h3>1. Knowledge-Distillation Loss <span class="code-ref">train/train_student.py:38–43</span></h3>
+      <div class="equation">$$L = \alpha \cdot T^2 \cdot KL\left(\sigma\left(\frac{z_t}{T}\right) \;\middle\Vert\; \sigma\left(\frac{z_s}{T}\right)\right) + (1-\alpha)\cdot CE\left(y,\; \sigma(z_s)\right)$$</div>
+      <p class="equation-params"><strong>Used:</strong> &alpha; = 0.7, T = 3.0, LR 5e-4, 5 epochs. <code>T²</code> rescales gradients so soft and hard terms stay balanced. Soft targets carry inter-class similarity (e.g. Crime vs Law); hard CE anchors ground truth.</p>
+      <pre class="code-block"><code>def kd_loss(student_logits, teacher_logits, labels, weights, T=3.0, alpha=0.7, device="cpu"):
+    ce = F.cross_entropy(student_logits, labels, weight=weights.to(device))
+    s = torch.log_softmax(student_logits / T, dim=-1)
+    t = torch.softmax(teacher_logits / T, dim=-1)
+    kl = (t * (torch.log(t + 1e-9) - s)).sum(-1).mean()
+    return alpha * (T * T) * kl + (1.0 - alpha) * ce, ce.item(), kl.item()</code></pre>
+    </div>
+
+    <div class="math-card">
+      <h3>2. Inverse-Frequency Class Weights <span class="code-ref">train/common.py:40–46</span></h3>
+      <div class="equation">$$w_c = \frac{N}{K \cdot N_c}$$</div>
+      <p class="equation-params">N = total samples, K = 11, N<sub>c</sub> = class-c count. Education (~1.3%) is ~25&times; smaller than Politics (~26%) — without this the model ignores rare classes.</p>
+      <pre class="code-block"><code>counts = labels.value_counts().sort_index()
+w = np.array([n / (k * counts.get(i, 1)) for i in range(k)], dtype=np.float32)</code></pre>
+    </div>
+
+    <div class="math-card">
+      <h3>3. FLOP Budget Gate <span class="code-ref">config.py:51, analysis/measure_flops.py</span></h3>
+      <div class="equation">$$\text{GFLOP} \le 1.0 \quad\text{(torch convention: FLOP = 2}\times\text{MACs, bs=1, fp32 forward)}$$</div>
+      <p class="equation-params">Student 4L-256H @ seq 96 &approx; <strong>0.64 GFLOP &rarr; PASS</strong>. Teacher DistilBERT @ 96 &approx; 8.16 GFLOP &rarr; FAIL (12&times; over). Operating point 96 chosen because p99 = 85 tokens: only 0.28% truncated.</p>
+    </div>
+
+    <h3 class="subhead">Graphs &amp; Evidence</h3>
+    <div class="graphs-grid">
+      <div class="graph-card"><h3>Token-Length Truncation</h3><img src="assets/images/token_dist.png" alt="Truncation fraction vs max length"><p class="caption">p50=39, p99=85. max_len=96 truncates 0.28% — from <code>generated/token_stats.csv</code>.</p></div>
+      <div class="graph-card"><h3>Per-Class F1</h3><img src="assets/images/per_class_f1.png" alt="Per-class F1 bar chart"><p class="caption">Sports 0.958 &rarr; Law &amp; Legal 0.537. Weak = smallest test sets.</p></div>
+      <div class="graph-card"><h3>Teacher vs Student</h3><img src="assets/images/teacher_vs_student.png" alt="Teacher vs student params, FLOPs, F1"><p class="caption">95% of teacher F1 at 1/12th the compute, 1/6th the size.</p></div>
+      <div class="graph-card"><h3>Class Imbalance</h3><img src="assets/images/class_imbalance.png" alt="Class distribution"><p class="caption">Why <code>w_c</code> weighting is mandatory — from <code>generated/class_counts_revised.csv</code>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section results-section" id="results">
+  <div class="container">
+    <h2 class="section-title">Test-Set Results (6,509 articles)</h2>
+    <div class="metrics-showcase">
+      <div class="metric-large"><span class="value">82.4%</span><span class="label">Accuracy</span></div>
+      <div class="metric-large"><span class="value">0.766</span><span class="label">Macro-F1</span></div>
+      <div class="metric-large"><span class="value">0.64 GFLOP</span><span class="label">Compute (PASS)</span></div>
+      <div class="metric-large"><span class="value">~6 ms</span><span class="label">CPU p50 latency</span></div>
+    </div>
+    <div class="table-container">
+      <h3>Per-Class Performance</h3>
+      <table class="results-table">
+        <thead><tr><th>Domain</th><th>F1</th><th>Strength</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Sports</td><td>0.958</td><td><span class="strength excellent">Excellent</span></td><td>Distinctive vocabulary</td></tr>
+          <tr><td>Health</td><td>0.870</td><td><span class="strength very-good">Very Good</span></td><td></td></tr>
+          <tr><td>Politics &amp; Government</td><td>0.866</td><td><span class="strength very-good">Very Good</span></td><td>Largest class</td></tr>
+          <tr><td>Crime &amp; Justice</td><td>0.837</td><td><span class="strength good">Good</span></td><td></td></tr>
+          <tr><td>Economy &amp; Business</td><td>0.818</td><td><span class="strength good">Good</span></td><td></td></tr>
+          <tr><td>Disasters &amp; Emergencies</td><td>0.786</td><td><span class="strength good">Good</span></td><td></td></tr>
+          <tr><td>War &amp; Conflicts</td><td>0.772</td><td><span class="strength decent">Decent</span></td><td>Confused with Politics</td></tr>
+          <tr><td>Science &amp; Technology</td><td>0.723</td><td><span class="strength moderate">Moderate</span></td><td>Overlaps Environment</td></tr>
+          <tr><td>Environment &amp; Climate</td><td>0.663</td><td><span class="strength moderate">Moderate</span></td><td>Keyword-extracted</td></tr>
+          <tr><td>Education</td><td>0.601</td><td><span class="strength weak">Weak</span></td><td>155 test rows (smallest)</td></tr>
+          <tr><td>Law &amp; Legal</td><td>0.537</td><td><span class="strength weak">Weakest</span></td><td>221 test rows; vs Crime</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>Teacher &rarr; Student:</strong> teacher val F1 0.807 (ep 3) &rarr; student val mean 0.771 (seeds 42: 0.765, 1337: 0.777) &rarr;
+      test 0.766. 12&times; FLOP cut for ~5% F1 cost. Full numbers in <code>REPORT.md</code>.
+    </div>
+  </div>
+</section>
+
+<!-- DEMO + CODE -->
+<section class="section demo-section" id="demo">
+  <div class="container">
+    <h2 class="section-title">Live Demo &amp; Code</h2>
+    <p class="section-description">Frontend is being deployed — link will appear here. Meanwhile use the video demo and run locally.</p>
+    <div class="demo-links">
+      <!-- TODO-Garima: replace href with your Netlify/Vercel URL after `cd frontend && npm run build` -->
+      <a href="https://github.com/garimadevi/article-domain-tagger/tree/main/frontend" class="btn btn-primary" target="_blank" rel="noopener">Frontend Code (deploy pending)</a>
+      <a href="https://github.com/garimadevi/article-domain-tagger" class="btn btn-secondary" target="_blank" rel="noopener">GitHub Repo</a>
+      <a href="https://github.com/garimadevi/article-domain-tagger/blob/main/REPORT.md" class="btn btn-secondary" target="_blank" rel="noopener">Full Report</a>
+    </div>
+    <div class="code-grid">
+      <div class="code-card">
+        <h3>Run the web interface</h3>
+        <pre class="code-block"><code># Terminal 1: API (port 8000)
+venv\Scripts\python.exe -m uvicorn app:app --reload --port 8000
+
+# Terminal 2: UI (port 5173)
+cd frontend
+npm install
+npm run dev
+# open http://localhost:5173</code></pre>
+      </div>
+      <div class="code-card">
+        <h3>Core logic — student <span class="code-ref">train/student.py</span></h3>
+        <pre class="code-block"><code>return BertConfig(
+    vocab_size=30522, hidden_size=256,
+    num_hidden_layers=4, num_attention_heads=4,
+    intermediate_size=1024, num_labels=11)</code></pre>
+        <h3>Core logic — inference <span class="code-ref">app.py: run_prediction</span></h3>
+        <pre class="code-block"><code>inputs = tokenizer(text, return_tensors="pt",
+    truncation=True, max_length=96, padding=True)
+probs = torch.softmax(model(**inputs).logits, dim=-1)[0]</code></pre>
+      </div>
+    </div>
+    <p class="video-caption">API: <code>POST /predict</code> (text &rarr; top-3 labels) &bull; <code>POST /fetch-url</code> (URL &rarr; extract + classify) &bull; <code>GET /health</code>. Dataset: <a href="https://huggingface.co/datasets/mdonigian/iab-news-classification" target="_blank" rel="noopener">mdonigian/iab-news-classification</a>.</p>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section team-section" id="team">
+  <div class="container">
+    <h2 class="section-title">Project Team</h2>
+    <div class="team-grid">
+      <div class="team-card student"><div class="team-icon">🎓</div><h3>Student</h3>
+        <ul><li><strong>Garima Devi</strong></li><li><a href="https://github.com/garimadevi" target="_blank" rel="noopener">github.com/garimadevi</a></li><li>Internship Project 2026</li></ul></div>
+      <div class="team-card mentor"><div class="team-icon">👨‍🏫</div><h3>Mentors</h3>
+        <ul><li><strong>Assigned Mentor</strong></li><li><strong>Mohd. Amaan Sir</strong> (Amaan Irfan Sir)</li></ul></div>
+      <div class="team-card advisor"><div class="team-icon">👨‍🔬</div><h3>Faculty Advisors</h3>
+        <ul><li><strong>Prof. Prithwijit Guha</strong> — Faculty Advisor</li><li><strong>Ashwin Jacob Gigo</strong> — Co-Advisor</li></ul></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="https://github.com/garimadevi/article-domain-tagger" target="_blank" rel="noopener">GitHub Repository</a>
+      <a href="https://github.com/garimadevi/article-domain-tagger/blob/main/REPORT.md" target="_blank" rel="noopener">Full Report</a>
+      <a href="https://huggingface.co/datasets/mdonigian/iab-news-classification" target="_blank" rel="noopener">IAB Dataset</a>
+      <a href="https://huggingface.co/distilbert-base-uncased" target="_blank" rel="noopener">DistilBERT Base</a>
+    </div>
+    <p class="footer-note">Article Domain Tagger — DistilBERT (67M) &rarr; Student 4L-256H (11.2M) &bull; 11 IAB domains &bull; 0.64 GFLOP &bull; Garima Devi</p>
+    <p class="deadline-note">Submission deadline: 15th September 2026</p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
